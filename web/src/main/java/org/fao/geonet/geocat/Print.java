@@ -12,6 +12,7 @@ import jeeves.server.sources.ServiceRequest.InputMethod;
 import jeeves.utils.BinaryFile;
 import jeeves.utils.Xml;
 
+import org.fao.geonet.kernel.setting.SettingInfo;
 import org.fao.geonet.services.Utils;
 import org.jdom.Element;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -42,9 +43,11 @@ public class Print implements Service {
         OutputStream os = new FileOutputStream(tempFile);
         
         try {
+        	String siteURL = new SettingInfo(context).getSiteUrl(false);
+        	String baseURL = siteURL+"/"+context.getBaseUrl()+"/srv/eng/metadata.show.embedded.print";
 	        ITextRenderer renderer = new ITextRenderer();
 	        String resultString = request.getResultString();
-			renderer.setDocumentFromString(resultString, "http://localhost:8190/geonetwork/srv/eng/metadata.show.embedded.print");
+			renderer.setDocumentFromString(resultString, baseURL);
 	        renderer.layout();
 	        renderer.createPDF(os);
         }
