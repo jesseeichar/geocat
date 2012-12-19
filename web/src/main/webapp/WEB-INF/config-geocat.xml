@@ -521,5 +521,28 @@
             <output file="true" contentType="application/zip" />
         </service>
 
+        <service name="print.test">
+            <class name=".geocat.Print"/>
+            <output file="true" contentType="application/pdf" />
+        </service>
+		<service name="metadata.show.embedded.print">
+			<class name=".services.metadata.Show">
+				<param name="addRefs" value="y" />
+				<param name="cache" value="y" />
+			</class>
+
+			<output sheet="metadata-show-embedded-print.xsl" contentType="text/xml; charset=UTF-8">
+				<call name="currTab"  class=".guiservices.util.GetCurrentMDTab"/>
+				<call name="position" class=".guiservices.util.GetPositionMD"/>
+				<call name="relation" class =".guiservices.metadata.GetRelated"/>
+				<call name="sources"  class=".guiservices.util.Sources"/>
+				<call name="isoLang"  class=".guiservices.isolanguages.Get"/>
+				<call name="clear"  class=".services.metadata.ClearCachedShowMetadata"/>
+			</output>
+
+			<error id="operation-not-allowed" sheet="error-embedded.xsl" statusCode="403">
+				<xml name="error" file="xml/metadata-show-error.xml" />
+			</error>
+		</service>
     </services>
 </geonet>

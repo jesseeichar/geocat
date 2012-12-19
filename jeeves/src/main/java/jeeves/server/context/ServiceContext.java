@@ -193,6 +193,17 @@ public class ServiceContext extends BasicContext
     }
 
 	public Element execute(LocalServiceRequest request) throws Exception {
+		basicExecute(request);
+		try {
+			return request.getResult();
+		} catch (Exception e) {
+			Log.error(Log.XLINK_PROCESSOR,"Failed to parse result xml from service:"+request.getService()+"\n"+ request.getResultString());
+			throw new ServiceExecutionFailedException(request.getService(),e);
+		}
+	}
+
+	public void basicExecute(LocalServiceRequest request)
+			throws ServiceExecutionFailedException {
 		ServiceContext context = new ServiceContext(request.getService(), getApplicationContext(), getXmlCacheManager(), getMonitorManager(), getProviderManager(), getSerialFactory(), getProfileManager(), htContexts) {
 			public ResourceManager getResourceManager() {
 				return new ResourceManager(getMonitorManager(), getProviderManager()) {
@@ -233,12 +244,6 @@ public class ServiceContext extends BasicContext
 		} finally {
 			// set old context back as thread local
 			setAsThreadLocal();
-		}
-		try {
-			return request.getResult();
-		} catch (Exception e) {
-			Log.error(Log.XLINK_PROCESSOR,"Failed to parse result xml from service:"+request.getService()+"\n"+ request.getResultString());
-			throw new ServiceExecutionFailedException(request.getService(),e);
 		}
 	}
 

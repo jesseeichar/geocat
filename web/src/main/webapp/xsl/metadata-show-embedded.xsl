@@ -11,7 +11,10 @@
 	show metadata form
 	-->
 	
-	<xsl:include href="main.xsl"/>
+
+	<xsl:include href="header.xsl"/>
+	<xsl:include href="banner.xsl"/>
+	<xsl:include href="utils.xsl"/>
     <xsl:include href="metadata.xsl"/>
 
     <xsl:variable name="protocol" select="/root/gui/env/server/protocol" />
