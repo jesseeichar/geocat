@@ -9,8 +9,8 @@
 		doctype-system="http://www.w3.org/TR/html4/loose.dtd"
 		indent="yes"
 		encoding="UTF-8" />
-	
-	<xsl:include href="header.xsl"/>
+
+    <xsl:include href="header.xsl"/>
 	<xsl:include href="banner.xsl"/>
 	<xsl:include href="utils.xsl"/>
 

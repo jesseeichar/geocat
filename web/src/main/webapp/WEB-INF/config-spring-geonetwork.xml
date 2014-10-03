@@ -68,5 +68,4 @@
 		<entry key="hibernate.jdbc.batch_versioned_data" value="true" />
 		<entry key="hibernate.enable_lazy_load_no_trans" value="true" />
     </util:map>
-
 </beans>
