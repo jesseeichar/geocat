@@ -3547,6 +3547,7 @@ public class DataManager {
     }
 
     public void updateXlinkObjects(String metadataId, String lang, Element md, Element... updatedXLinks) throws Exception {
+/*
         ProcessParams params = new ProcessParams(ReusableObjectLogger.THREAD_SAFE_LOGGER, metadataId, md, md, false, lang, servContext);
         ReusableObjManager reusableObjMan = servContext.getBean(ReusableObjManager.class);
         for (Element xlink : updatedXLinks) {
@@ -3561,6 +3562,7 @@ public class DataManager {
             int index = parentElement.indexOf(xlink);
             parentElement.addContent(index + 1, newElements);
         }
+*/
     }
 
     private SetMultimap<Integer, ReservedOperation> loadOperationsAllowed(ServiceContext context, Specification<OperationAllowed>
