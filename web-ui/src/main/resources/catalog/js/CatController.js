@@ -45,6 +45,7 @@
 
       $scope.pages = {
         home: 'home',
+        admin: 'admin.console' + $scope.isDebug ? '?debug' : '',
         signin: 'catalog.signin'
       };
 
