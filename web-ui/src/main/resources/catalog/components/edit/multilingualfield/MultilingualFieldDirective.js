@@ -37,17 +37,35 @@
           // Get languages from attributes (could be grab from the
           // form field ? FIXME)
           scope.languages = angular.fromJson(attrs.gnMultilingualField);
-          scope.currentLanguage = scope.mainLanguage;
-          scope.mainLangInOtherLang =
-              angular.isDefined(scope.languages[scope.mainLanguage]);
+          var mainLanguage = scope.mainLanguage;
+          // Have to map the main language to one of the languages in the inputs
+          if (angular.isDefined(scope.languages[mainLanguage])) {
+            mainLanguage = scope.languages[mainLanguage].substring(1);
+          } else {
+            $(element).find(formFieldsSelector).each(function () {
+              var lang = $(this).attr('lang');
+              if (!angular.isDefined(scope.languages[lang])) {
+                mainLanguage = scope.languages[lang].substring(1);
+              }
+            });
+          }
+
+          scope.hasData = {};
+
+          angular.forEach(scope.languages, function(longCode, shortCode) {
+            scope.hasData[shortCode] = false;
+          });
+
+          scope.currentLanguage = mainLanguage;
+
           /**
            * Get the 3 letter code set in codeListValue
            * from a lang identifier eg. "EN"
            */
           function getISO3Code(langId) {
             var langCode = null;
-            if (langId === scope.mainLanguage) {
-              return scope.mainLanguage;
+            if (langId === mainLanguage) {
+              return mainLanguage;
             }
             angular.forEach(scope.languages,
                 function(key, value) {
@@ -64,18 +82,27 @@
             scope.expanded = scope.expanded === 'true';
 
             $(element).find(formFieldsSelector).each(function() {
-              var langId = $(this).attr('lang');
+              var inputEl = $(this);
+              var langId = inputEl.attr('lang');
 
               // FIXME : should not be the id but the ISO3Code
               if (langId) {
                 // Add the language label
-                $(this).before('<span class="label label-primary">' +
+                inputEl.before('<span class="label label-primary">' +
                     $translate(getISO3Code(langId)) + '</span>');
 
                 // Set the direction attribute
                 if ($.inArray(langId, rtlLanguages) !== -1) {
-                  $(this).attr('dir', 'rtl');
+                  inputEl.attr('dir', 'rtl');
                 }
+
+                var setNoDataClass = function(){
+                  scope.hasData['#' + langId] = inputEl.val().trim().length > 0
+                };
+
+                inputEl.on('keyup', setNoDataClass);
+
+                setNoDataClass();
               }
             });
 
@@ -87,7 +114,7 @@
             scope.currentLanguage = langId.replace('#', '');
             $(element).find(formFieldsSelector).each(function() {
               if ($(this).attr('lang') === scope.currentLanguage ||
-                  ($(this).attr('lang') === scope.mainLanguage &&
+                  ($(this).attr('lang') === mainLanguage &&
                   scope.currentLanguage === '')) {
                 $(this).removeClass('hidden').focus();
               } else {
@@ -113,10 +140,10 @@
               } else {
                 setLabel('allLanguage');
                 $(this).prev('span').addClass('hidden');
-                if ($(this).attr('lang') !== scope.mainLanguage) {
+                if ($(this).attr('lang') !== mainLanguage) {
                   $(this).addClass('hidden');
                 } else {
-                  scope.currentLanguage = scope.mainLanguage;
+                  scope.currentLanguage = mainLanguage;
                   $(this).removeClass('hidden');
                 }
               }
