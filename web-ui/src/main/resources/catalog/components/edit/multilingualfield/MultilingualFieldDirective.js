@@ -22,7 +22,7 @@
         restrict: 'A',
         transclude: true,
         templateUrl: '../../catalog/components/edit/' +
-            'multilingualfield/partials/multilingualfield.html',
+        'multilingualfield/partials/multilingualfield.html',
         scope: {
           mainLanguage: '@',
           expanded: '@'
@@ -50,11 +50,17 @@
             });
           }
 
-          scope.hasData = {};
+          if (!mainLanguage) {
+            // when there is a gco:CharacterString and there is no PT_FreeText with the same language
+            // then the scope.languages map has an entry mainLanguage -> #
+            // but the problem is that the input element will have the 'lang' attribute to be eng (not empty string).  So
+            // we need to update the map and main language to be '#' + scope.mainLanguage so that all the looks ups can be done correctly.
+            mainLanguage = scope.mainLanguage;
+            scope.languages[mainLanguage] = '#' + mainLanguage;
+          }
 
-          angular.forEach(scope.languages, function(longCode, shortCode) {
-            scope.hasData[shortCode] = false;
-          });
+
+          scope.hasData = {};
 
           scope.currentLanguage = mainLanguage;
 
@@ -64,16 +70,12 @@
            */
           function getISO3Code(langId) {
             var langCode = null;
-            if (langId === mainLanguage) {
-              return mainLanguage;
-            }
             angular.forEach(scope.languages,
-                function(key, value) {
-                  if (key === '#' + langId) {
-                    langCode = value;
-                    return;
-                  }
+              function(key, value) {
+                if (key === '#' + langId) {
+                  langCode = value;
                 }
+              }
             );
             return langCode;
           }
@@ -89,7 +91,7 @@
               if (langId) {
                 // Add the language label
                 inputEl.before('<span class="label label-primary">' +
-                    $translate(getISO3Code(langId)) + '</span>');
+                $translate(getISO3Code(langId)) + '</span>');
 
                 // Set the direction attribute
                 if ($.inArray(langId, rtlLanguages) !== -1) {
@@ -97,7 +99,8 @@
                 }
 
                 var setNoDataClass = function(){
-                  scope.hasData['#' + langId] = inputEl.val().trim().length > 0
+                  var code = ('#' + langId);
+                  scope.hasData[code] = inputEl.val().trim().length > 0
                 };
 
                 inputEl.on('keyup', setNoDataClass);
@@ -114,8 +117,8 @@
             scope.currentLanguage = langId.replace('#', '');
             $(element).find(formFieldsSelector).each(function() {
               if ($(this).attr('lang') === scope.currentLanguage ||
-                  ($(this).attr('lang') === mainLanguage &&
-                  scope.currentLanguage === '')) {
+                ($(this).attr('lang') === mainLanguage &&
+                scope.currentLanguage === '')) {
                 $(this).removeClass('hidden').focus();
               } else {
                 $(this).addClass('hidden');
@@ -130,7 +133,7 @@
 
           scope.displayAllLanguages = function(force) {
             scope.expanded =
-                force !== undefined ? force : !scope.expanded;
+              force !== undefined ? force : !scope.expanded;
 
             $(element).find(formFieldsSelector).each(function() {
               if (scope.expanded) {
@@ -140,6 +143,7 @@
               } else {
                 setLabel('allLanguage');
                 $(this).prev('span').addClass('hidden');
+
                 if ($(this).attr('lang') !== mainLanguage) {
                   $(this).addClass('hidden');
                 } else {
