@@ -131,14 +131,19 @@
     <xsl:param name="overrideLabel" select="''" required="no"/>
 
     <xsl:variable name="elementName" select="name()"/>
-    
+    <xsl:variable name="parentElementName" select="name(..)"/>
+
     <xsl:variable name="hasPTFreeText"
                   select="count(gmd:PT_FreeText) > 0"/>
     <xsl:variable name="hasOnlyPTFreeText"
                   select="count(gmd:PT_FreeText) > 0 and count(gco:CharacterString) = 0"/>
     <xsl:variable name="isMultilingualElement" 
                   select="$metadataIsMultilingual and
-                    count($editorConfig/editor/multilingualFields/exclude[name = $elementName]) = 0"/>
+                    (count($editorConfig/editor/multilingualFields/exclude[name = $elementName]) = 0 or
+                     (count($editorConfig/editor/multilingualFields/exclude[name = $elementName]) > 0 and
+                      not(not($editorConfig/editor/multilingualFields/exclude/name[. = $elementName]/@parent)) and
+                      count($editorConfig/editor/multilingualFields/exclude/name[. = $elementName and @parent = $parentElementName]) = 0)) "/>
+
     <xsl:variable name="isMultilingualElementExpanded" 
                   select="count($editorConfig/editor/multilingualFields/expanded[name = $elementName]) > 0"/>
     
