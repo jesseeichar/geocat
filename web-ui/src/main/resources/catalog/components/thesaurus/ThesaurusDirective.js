@@ -22,9 +22,10 @@
       ['$timeout',
        'gnThesaurusService', 'gnEditor',
        'gnEditorXMLService', 'gnCurrentEdit',
+       'gcSharedobject',
        function($timeout,
                gnThesaurusService, gnEditor,
-               gnEditorXMLService, gnCurrentEdit) {
+               gnEditorXMLService, gnCurrentEdit, gcSharedobject) {
 
          return {
            restrict: 'A',
@@ -75,8 +76,13 @@
              });
 
              scope.add = function() {
+               //specific geocat
+               gcSharedobject.editEntry('keywords');
+/*
                gnEditor.add(gnCurrentEdit.id,
                scope.elementRef, scope.elementName, scope.domId, 'before');
+*/
+               // end specific geocat
              };
 
              scope.addThesaurus = function(thesaurusIdentifier) {
@@ -127,9 +133,9 @@
   module.directive('gnKeywordSelector',
       ['$timeout', '$translate',
        'gnThesaurusService', 'gnEditor',
-       'Keyword',
+       'Keyword', 'gcSharedobject',
        function($timeout, $translate,
-               gnThesaurusService, gnEditor, Keyword) {
+               gnThesaurusService, gnEditor, Keyword, gcSharedobject) {
 
          return {
            restrict: 'A',
@@ -252,6 +258,20 @@
                    itemText: 'label',
                    maxTags: scope.maxTags
                  });
+
+                 //specific geocat
+                 $(id).on('itemAdded', function(e,o) {
+                   if(e.item.props.thesaurus.key ==
+                       'local._none_.non_validated') {
+                     var editSpan = $('<span />').addClass('fa fa-edit');
+                     editSpan.on('click', function(evt) {
+                       gcSharedobject.editEntry('keywords', e.item);
+                       evt.stopPropagation();
+                     });
+                     e.tag.append(editSpan);
+                   }
+                 });
+                 // end specific geocat
 
                  // Add selection to the list of tags
                  angular.forEach(scope.selected, function(keyword) {
