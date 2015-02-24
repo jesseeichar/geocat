@@ -140,8 +140,7 @@
     <xsl:variable name="isMultilingualElement" 
                   select="$metadataIsMultilingual and
                     (count($editorConfig/editor/multilingualFields/exclude[name = $elementName]) = 0 or
-                     (count($editorConfig/editor/multilingualFields/exclude[name = $elementName]) > 0 and
-                      not(not($editorConfig/editor/multilingualFields/exclude/name[. = $elementName]/@parent)) and
+                     (not(not($editorConfig/editor/multilingualFields/exclude/name[. = $elementName]/@parent)) and
                       count($editorConfig/editor/multilingualFields/exclude/name[. = $elementName and @parent = $parentElementName]) = 0)) "/>
 
     <xsl:variable name="isMultilingualElementExpanded" 
