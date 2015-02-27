@@ -33,6 +33,8 @@
     <external.theme.gemet-theme>GEMET Themen</external.theme.gemet-theme>
     <external.theme.inspire-theme>GEMET - INSPIRE themes, version 1.0</external.theme.inspire-theme>
     <external._none_.gemet>GEMET Thesaurus</external._none_.gemet>
+    <external.none.allThesaurus>Alle Schlüsselwörter</external.none.allThesaurus>
+
     <downloadBackup>Backup-Datei downloaden</downloadBackup>
     <downloadBackupDesc>Backup-Datei mit sämtlichen Metadaten downloaden</downloadBackupDesc>
     <ContactSelectionTitle js="true">Kontaktauswahl</ContactSelectionTitle>

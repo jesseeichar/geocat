@@ -22,14 +22,15 @@
 
 package org.fao.geonet.kernel;
 
+import com.google.common.collect.Maps;
 import jeeves.server.context.ServiceContext;
 import jeeves.xlink.Processor;
 import org.fao.geonet.Util;
 import org.fao.geonet.constants.Geonet;
 import org.fao.geonet.domain.Metadata;
-import org.fao.geonet.languages.IsoLanguagesMapper;
 import org.fao.geonet.kernel.oaipmh.Lib;
 import org.fao.geonet.kernel.setting.SettingManager;
+import org.fao.geonet.languages.IsoLanguagesMapper;
 import org.fao.geonet.repository.MetadataRepository;
 import org.fao.geonet.utils.IO;
 import org.fao.geonet.utils.Log;
@@ -49,30 +50,31 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static com.google.common.io.Files.getNameWithoutExtension;
 
 //=============================================================================
 public class ThesaurusManager implements ThesaurusFinder {
 
+    private SettingManager settingManager;
 	private ConcurrentHashMap<String, Thesaurus> thesauriMap = new ConcurrentHashMap<String, Thesaurus>();
 	private LocalService service = null;
 	private Path thesauriDirectory = null;
     private boolean initialized = false;
-
+    private AllThesaurus allThesaurus;
 
     /**
 	 * Initialize ThesaurusManager.
 	 *
      *
-     * @param isTest
      * @param context ServiceContext used to check when servlet is up only
-     * @param thesauriRepository
-     * @throws Exception
 	 */
 	public synchronized void init(boolean isTest, ServiceContext context, String thesauriRepository)
 			throws Exception {
@@ -80,6 +82,11 @@ public class ThesaurusManager implements ThesaurusFinder {
             return;
         }
         this.initialized = true;
+        this.settingManager = context.getBean(SettingManager.class);
+
+        final String siteURL = this.settingManager.getSiteURL(context);
+        this.allThesaurus = new AllThesaurus(this, getIsoLanguagesMapper(context), siteURL);
+
 		// Get Sesame interface
 		service = Sesame.getService();
 
@@ -337,18 +344,25 @@ public class ThesaurusManager implements ThesaurusFinder {
 	
 	@Override
     public Map<String, Thesaurus> getThesauriMap() {
-		return Collections.unmodifiableMap(thesauriMap);
+        if (this.settingManager.getValueAsBool(SettingManager.ENABLE_ALL_THESAURUS)) {
+            final HashMap<String, Thesaurus> all = Maps.newHashMap(this.thesauriMap);
+            all.put(this.allThesaurus.getKey(), this.allThesaurus);
+            return all;
+        } else {
+            return Collections.unmodifiableMap(thesauriMap);
+        }
 	}
 
     @Override
-    public Thesaurus getThesaurusByName(String thesaurusName) {
-		return thesauriMap.get(thesaurusName);
+    @Nullable
+    public Thesaurus getThesaurusByName(@Nonnull String thesaurusName) {
+		return getThesauriMap().get(thesaurusName);
 	}
 
 	@Override
 	public Thesaurus getThesaurusByConceptScheme(String uri) {
 		
-		for (Map.Entry<String, Thesaurus> entry : thesauriMap.entrySet()) {
+		for (Map.Entry<String, Thesaurus> entry : getThesauriMap().entrySet()) {
 			try {
 				Thesaurus thesaurus = entry.getValue();
 				
@@ -370,7 +384,7 @@ public class ThesaurusManager implements ThesaurusFinder {
 	 */
 	@Override
     public boolean existsThesaurus(String name) {
-		return (thesauriMap.get(name) != null);
+		return (getThesauriMap().get(name) != null);
 	}
 
 	/**

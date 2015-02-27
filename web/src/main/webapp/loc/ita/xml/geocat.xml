@@ -34,6 +34,8 @@
     <external.theme.gemet-theme>GEMET themes</external.theme.gemet-theme>
     <external.theme.inspire-theme>GEMET - INSPIRE themes, version 1.0</external.theme.inspire-theme>
     <external._none_.gemet>GEMET concepts</external._none_.gemet>
+    <external.none.allThesaurus>All Keywords</external.none.allThesaurus>
+
     <downloadBackup>Scarica file di backup</downloadBackup>
     <downloadBackupDesc>Scarica un file con tutti i metadati del catalogo</downloadBackupDesc>
     <ContactSelectionTitle js="true">Selezione Contatti</ContactSelectionTitle>
