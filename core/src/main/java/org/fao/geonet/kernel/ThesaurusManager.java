@@ -27,15 +27,19 @@ import jeeves.server.context.ServiceContext;
 import jeeves.xlink.Processor;
 import org.fao.geonet.Util;
 import org.fao.geonet.constants.Geonet;
+import org.fao.geonet.domain.Constants;
 import org.fao.geonet.domain.Metadata;
+import org.fao.geonet.domain.ThesaurusActivation;
 import org.fao.geonet.kernel.oaipmh.Lib;
 import org.fao.geonet.kernel.setting.SettingManager;
 import org.fao.geonet.languages.IsoLanguagesMapper;
 import org.fao.geonet.repository.MetadataRepository;
+import org.fao.geonet.repository.ThesaurusActivationRepository;
 import org.fao.geonet.utils.IO;
 import org.fao.geonet.utils.Log;
 import org.fao.geonet.utils.Xml;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.openrdf.sesame.Sesame;
 import org.openrdf.sesame.config.ConfigurationException;
 import org.openrdf.sesame.config.RepositoryConfig;
@@ -49,6 +53,8 @@ import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -434,4 +440,79 @@ public class ThesaurusManager implements ThesaurusFinder {
         return context.getBean(IsoLanguagesMapper.class);
     }
 
+    /**
+     *
+     * @param context
+     * @param thesauriMap
+     * @return {@link org.jdom.Element}
+     * @throws java.sql.SQLException
+     */
+    public Element buildResultfromThTable(ServiceContext context) throws SQLException, JDOMException, IOException {
+
+        Element elRoot = new Element("thesauri");
+
+        Collection<Thesaurus> e = thesauriMap.values();
+        for (Thesaurus currentTh : e) {
+            Element elLoop = new Element("thesaurus");
+
+            Element elKey = new Element("key");
+            String key = currentTh.getKey();
+            elKey.addContent(key);
+
+            Element elDname = new Element("dname");
+            String dname = currentTh.getDname();
+            elDname.addContent(dname);
+
+            Element elFname = new Element("filename");
+            String fname = currentTh.getFname();
+            elFname.addContent(fname);
+
+            Element elTitle = new Element("title");
+            String title = currentTh.getTitles(context.getApplicationContext()).get(context.getLanguage());
+            if(title == null) {
+                title = currentTh.getTitle();
+            }
+            elTitle.addContent(title);
+
+            Element elType = new Element("type");
+            String type = currentTh.getType();
+            elType.addContent(type);
+
+            Element elDate = new Element("date");
+            String date = currentTh.getDate();
+            elDate.addContent(date);
+
+            Element elUrl = new Element("url");
+            String url = currentTh.getDownloadUrl();
+            elUrl.addContent(url);
+
+            Element elDefaultURI = new Element("defaultNamespace");
+            String defaultURI = currentTh.getDefaultNamespace();
+            elDefaultURI.addContent(defaultURI);
+
+
+            Element elActivated= new Element("activated");
+            char activated = Constants.YN_TRUE;
+            final ThesaurusActivationRepository activationRepository = context.getBean(ThesaurusActivationRepository.class);
+            final ThesaurusActivation activation = activationRepository.findOne(currentTh.getKey());
+            if (activation == null || !activation.isActivated()) {
+                activated = Constants.YN_FALSE;
+            }
+            elActivated.setText(""+activated);
+
+            elLoop.addContent(elKey);
+            elLoop.addContent(elDname);
+            elLoop.addContent(elFname);
+            elLoop.addContent(elTitle);
+            elLoop.addContent(elDate);
+            elLoop.addContent(elUrl);
+            elLoop.addContent(elDefaultURI);
+            elLoop.addContent(elType);
+            elLoop.addContent(elActivated);
+
+            elRoot.addContent(elLoop);
+        }
+
+        return elRoot;
+    }
 }
